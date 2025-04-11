@@ -183,7 +183,7 @@ header {
   letter-spacing: 1px;
   transition: var(--transition);
   cursor: pointer;
-  margin: auto;
+  margin-left: 500px;
 }
 
 .btn:hover {
