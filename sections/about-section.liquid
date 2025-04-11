@@ -1,0 +1,66 @@
+<section class="about-section">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-image-container">
+        <img 
+          src="{{ section.settings.image | img_url: 'master' }}" 
+          alt="{{ section.settings.image.alt | escape }}"
+          class="about-image"
+          loading="lazy"
+        >
+      </div>
+      
+      <div class="about-content">
+        <h2>{{ section.settings.title }}</h2>
+        <div class="rte">{{ section.settings.text }}</div>
+        
+        {% if section.settings.button_text != blank and section.settings.button_link != blank %}
+          <a href="{{ section.settings.button_link }}" class="btn">{{ section.settings.button_text }}</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About Section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Our Story"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>We are a premium fashion brand dedicated to creating timeless pieces that elevate your style. Our mission is to provide high-quality, sustainably made clothing that makes you look and feel your best.</p><p>Founded in 2010, we've grown from a small boutique to an international brand while maintaining our commitment to ethical production and exceptional craftsmanship.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Learn More"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/pages/about"
+    }
+  ],
+  "presets": [
+    {
+      "name": "About Section",
+      "category": "Text"
+    }
+  ]
+}
+{% endschema %}

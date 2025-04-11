@@ -1,0 +1,104 @@
+<section class="featured-section">
+  <div class="container">
+    <div class="section-title">
+      <h2>{{ section.settings.title }}</h2>
+      {% if section.settings.subtitle != blank %}
+        <p>{{ section.settings.subtitle }}</p>
+      {% endif %}
+    </div>
+    
+    <div class="collection-grid">
+      {% for block in section.blocks %}
+        {% assign collection = collections[block.settings.collection] %}
+        <div class="collection-item">
+          <a href="{{ collection.url }}">
+            {% if collection.image %}
+              <img 
+                src="{{ collection.image | img_url: 'master' }}" 
+                alt="{{ collection.title | escape }}"
+                class="collection-image"
+                loading="lazy"
+              >
+            {% elsif collection.products.first.featured_image %}
+              <img 
+                src="{{ collection.products.first.featured_image | img_url: 'master' }}" 
+                alt="{{ collection.title | escape }}"
+                class="collection-image"
+                loading="lazy"
+              >
+            {% else %}
+              {{ 'collection-1' | placeholder_svg_tag: 'collection-image' }}
+            {% endif %}
+            
+            <div class="collection-overlay">
+              <h3 class="collection-title">{{ collection.title }}</h3>
+              {% if block.settings.show_description %}
+                <p>{{ collection.description | strip_html | truncatewords: 15 }}</p>
+              {% endif %}
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collection Grid",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Shop by Category"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Explore our curated collections"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_description",
+          "label": "Show collection description",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Grid",
+      "category": "Collection",
+      "blocks": [
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

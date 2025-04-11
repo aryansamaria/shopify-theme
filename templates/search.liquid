@@ -1,0 +1,170 @@
+<div class="container" style="padding: 60px 0;">
+  <h1 style="font-size: 2.5rem; font-family: var(--font-secondary); margin-bottom: 30px; text-align: center;">Search Results</h1>
+  
+  <div style="max-width: 600px; margin: 0 auto 40px; text-align: center;">
+    <form action="/search" method="get" role="search">
+      <div style="display: flex;">
+        <input 
+          type="search" 
+          name="q" 
+          value="{{ search.terms | escape }}"
+          placeholder="Search our store"
+          style="flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-right: none;"
+        >
+        <button 
+          type="submit" 
+          style="background-color: var(--primary-color); color: #fff; border: none; padding: 0 20px; cursor: pointer;"
+        >
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+  
+  <div style="text-align: center; margin-bottom: 40px;">
+    {% if search.performed %}
+      {% if search.results_count == 0 %}
+        <p>No results found for "{{ search.terms | escape }}".</p>
+      {% else %}
+        <p>{{ search.results_count }} {% if search.results_count == 1 %}result{% else %}results{% endif %} for "{{ search.terms | escape }}"</p>
+      {% endif %}
+    {% endif %}
+  </div>
+  
+  {% if search.performed and search.results_count > 0 %}
+    <div class="product-grid">
+      {% for item in search.results %}
+        {% if item.object_type == 'product' %}
+          <div class="product-card" data-variant-id="{{ item.variants.first.id }}">
+            <a href="{{ item.url }}">
+              <div class="product-image-container">
+                {% if item.featured_image != blank %}
+                  <img 
+                    class="product-image"
+                    src="{{ item.featured_image | img_url: 'medium' }}" 
+                    alt="{{ item.featured_image.alt | escape }}"
+                    loading="lazy"
+                  >
+                {% else %}
+                  {{ 'product-1' | placeholder_svg_tag: 'product-image' }}
+                {% endif %}
+                
+                <div class="quick-add">Quick Add</div>
+              </div>
+              
+              <div class="product-info">
+                <h3 class="product-title">{{ item.title }}</h3>
+                <div class="product-price">
+                  {% if item.compare_at_price > item.price %}
+                    <span class="sale-price">{{ item.price | money }}</span>
+                    <s class="regular-price">{{ item.compare_at_price | money }}</s>
+                  {% else %}
+                    <span>{{ item.price | money }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          </div>
+        {% else %}
+          <div style="text-align: left; margin-bottom: 30px; padding: 20px; border: 1px solid #eee;">
+            <h3 style="margin-bottom: 10px;">
+              <a href="{{ item.url }}">{{ item.title }}</a>
+            </h3>
+            {% if item.object_type == 'article' %}
+              <p style="color: #777; font-size: 0.9rem; margin-bottom: 10px;">{{ item.published_at | date: "%B %d, %Y" }}</p>
+            {% endif %}
+            <p>{{ item.content | strip_html | truncatewords: 50 }}</p>
+            <a href="{{ item.url }}" style="display: inline-block; margin-top: 15px; color: var(--accent-color);">Read more</a>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+    
+    {% if paginate.pages > 1 %}
+      <div style="text-align: center; margin-top: 50px;">
+        <div style="display: inline-flex; gap: 10px;">
+          {% if paginate.previous %}
+            <a href="{{ paginate.previous.url }}" class="btn" style="padding: 8px 15px;">Previous</a>
+          {% endif %}
+          
+          {% for part in paginate.parts %}
+            {% if part.is_link %}
+              <a href="{{ part.url }}" style="
+                display: inline-block;
+                width: 40px;
+                height: 40px;
+                line-height: 40px;
+                border: 1px solid #ddd;
+                text-align: center;
+              ">{{ part.title }}</a>
+            {% else %}
+              <span style="
+                display: inline-block;
+                width: 40px;
+                height: 40px;
+                line-height: 40px;
+                border: 1px solid var(--accent-color);
+                background-color: var(--accent-color);
+                color: #fff;
+                text-align: center;
+              ">{{ part.title }}</span>
+            {% endif %}
+          {% endfor %}
+          
+          {% if paginate.next %}
+            <a href="{{ paginate.next.url }}" class="btn" style="padding: 8px 15px;">Next</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+
+<script>
+  // Quick add functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const quickAddButtons = document.querySelectorAll('.quick-add');
+    
+    quickAddButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Get product variant ID
+        const variantId = this.closest('.product-card').dataset.variantId;
+        
+        if (variantId) {
+          // Add to cart functionality - this would use Shopify's AJAX API
+          fetch('/cart/add.js', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              id: variantId,
+              quantity: 1
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            // Show a mini cart or success notification
+            alert('Item added to cart!');
+            
+            // Update cart count
+            fetch('/cart.js')
+              .then(response => response.json())
+              .then(cart => {
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount) {
+                  cartCount.textContent = cart.item_count;
+                }
+              });
+          })
+          .catch(error => {
+            console.error('Error adding item to cart:', error);
+          });
+        }
+      });
+    });
+  });
+</script>

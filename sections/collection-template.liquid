@@ -1,0 +1,384 @@
+{% if section.settings.show_collection_image and collection.image %}
+  <div class="collection-hero" style="
+    height: 350px;
+    background-image: url('{{ collection.image | img_url: 'master' }}');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    margin-bottom: 60px;
+  ">
+    <div style="
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.3);
+    "></div>
+    <div class="container" style="
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      z-index: 1;
+    ">
+      <h1 style="
+        color: #fff;
+        font-size: 2.5rem;
+        font-family: var(--font-secondary);
+        margin-bottom: 15px;
+      ">{{ collection.title }}</h1>
+      
+      {% if collection.description != blank %}
+        <div style="
+          color: #fff;
+          max-width: 600px;
+        ">{{ collection.description }}</div>
+      {% endif %}
+    </div>
+  </div>
+{% else %}
+  <div class="container" style="padding-top: 60px; padding-bottom: 20px;">
+    <h1 style="
+      font-size: 2.5rem;
+      font-family: var(--font-secondary);
+      margin-bottom: 15px;
+    ">{{ collection.title }}</h1>
+    
+    {% if collection.description != blank %}
+      <div style="
+        max-width: 800px;
+        margin-bottom: 30px;
+      ">{{ collection.description }}</div>
+    {% endif %}
+  </div>
+{% endif %}
+
+<div class="container" style="padding-bottom: 60px;">
+  <div style="display: flex; flex-wrap: wrap; gap: 30px;">
+    <!-- Sidebar / Filters -->
+    {% if section.settings.show_sidebar %}
+      <div style="flex: 0 0 250px;">
+        <div style="position: sticky; top: 100px;">
+          <!-- Collection List -->
+          {% if section.settings.show_collection_list %}
+            <div style="margin-bottom: 30px;">
+              <h3 style="font-family: var(--font-secondary); margin-bottom: 15px;">Collections</h3>
+              <ul style="list-style: none; padding: 0;">
+                {% for collection_item in collections %}
+                  <li style="margin-bottom: 10px;">
+                    <a 
+                      href="{{ collection_item.url }}" 
+                      style="
+                        {% if collection_item.handle == collection.handle %}
+                          font-weight: bold;
+                          color: var(--accent-color);
+                        {% endif %}
+                      "
+                    >
+                      {{ collection_item.title }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          
+          <!-- Product Type Filter -->
+          {% if section.settings.show_product_type_filter and collection.all_types.size > 0 %}
+            <div style="margin-bottom: 30px;">
+              <h3 style="font-family: var(--font-secondary); margin-bottom: 15px;">Product Type</h3>
+              <ul style="list-style: none; padding: 0;">
+                {% for product_type in collection.all_types %}
+                  <li style="margin-bottom: 10px;">
+                    <a href="{{ collection.url }}?filter.p.product_type={{ product_type | url_encode }}">
+                      {{ product_type }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          
+          <!-- Vendor Filter -->
+          {% if section.settings.show_vendor_filter and collection.all_vendors.size > 0 %}
+            <div style="margin-bottom: 30px;">
+              <h3 style="font-family: var(--font-secondary); margin-bottom: 15px;">Brand</h3>
+              <ul style="list-style: none; padding: 0;">
+                {% for vendor in collection.all_vendors %}
+                  <li style="margin-bottom: 10px;">
+                    <a href="{{ collection.url }}?filter.p.vendor={{ vendor | url_encode }}">
+                      {{ vendor }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          
+          <!-- Price Filter -->
+          {% if section.settings.show_price_filter %}
+            <div style="margin-bottom: 30px;">
+              <h3 style="font-family: var(--font-secondary); margin-bottom: 15px;">Price</h3>
+              <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 10px;">
+                  <a href="{{ collection.url }}?filter.v.price.gte=0&filter.v.price.lte=50">Under $50</a>
+                </li>
+                <li style="margin-bottom: 10px;">
+                  <a href="{{ collection.url }}?filter.v.price.gte=50&filter.v.price.lte=100">$50 - $100</a>
+                </li>
+                <li style="margin-bottom: 10px;">
+                  <a href="{{ collection.url }}?filter.v.price.gte=100&filter.v.price.lte=200">$100 - $200</a>
+                </li>
+                <li style="margin-bottom: 10px;">
+                  <a href="{{ collection.url }}?filter.v.price.gte=200">$200+</a>
+                </li>
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+    
+    <!-- Products -->
+    <div style="flex: 1;">
+      <!-- Sorting and View Options -->
+      <div style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+      ">
+        <div>
+          {{ collection.products_count }} products
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <label for="SortBy" style="margin-bottom: 0;">Sort by:</label>
+          <select id="SortBy" style="padding: 8px; border: 1px solid #ddd;">
+            <option value="manual" {% if collection.sort_by == 'manual' %}selected{% endif %}>Featured</option>
+            <option value="price-ascending" {% if collection.sort_by == 'price-ascending' %}selected{% endif %}>Price, low to high</option>
+            <option value="price-descending" {% if collection.sort_by == 'price-descending' %}selected{% endif %}>Price, high to low</option>
+            <option value="title-ascending" {% if collection.sort_by == 'title-ascending' %}selected{% endif %}>Alphabetically, A-Z</option>
+            <option value="title-descending" {% if collection.sort_by == 'title-descending' %}selected{% endif %}>Alphabetically, Z-A</option>
+            <option value="created-descending" {% if collection.sort_by == 'created-descending' %}selected{% endif %}>Date, new to old</option>
+            <option value="created-ascending" {% if collection.sort_by == 'created-ascending' %}selected{% endif %}>Date, old to new</option>
+            <option value="best-selling" {% if collection.sort_by == 'best-selling' %}selected{% endif %}>Best selling</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Product Grid -->
+      <div class="product-grid">
+        {% for product in collection.products %}
+          <div class="product-card" data-variant-id="{{ product.first_available_variant.id }}">
+            <a href="{{ product.url }}">
+              <div class="product-image-container">
+                {% if product.featured_image != blank %}
+                  <img 
+                    class="product-image"
+                    src="{{ product.featured_image | img_url: 'medium' }}" 
+                    alt="{{ product.featured_image.alt | escape }}"
+                    loading="lazy"
+                  >
+                {% else %}
+                  {{ 'product-1' | placeholder_svg_tag: 'product-image' }}
+                {% endif %}
+                
+                <div class="quick-add">Quick Add</div>
+              </div>
+              
+              <div class="product-info">
+                <h3 class="product-title">{{ product.title }}</h3>
+                <div class="product-price">
+                  {% if product.compare_at_price > product.price %}
+                    <span class="sale-price">{{ product.price | money }}</span>
+                    <s class="regular-price">{{ product.compare_at_price | money }}</s>
+                  {% else %}
+                    <span>{{ product.price | money }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          </div>
+        {% else %}
+          <div style="text-align: center; width: 100%; padding: 50px 0;">
+            <p>No products found in this collection</p>
+          </div>
+        {% endfor %}
+      </div>
+      
+      <!-- Pagination -->
+      {% if paginate.pages > 1 %}
+        <div style="text-align: center; margin-top: 50px;">
+          <div style="display: inline-flex; gap: 10px;">
+            {% if paginate.previous %}
+              <a href="{{ paginate.previous.url }}" class="btn" style="padding: 8px 15px;">Previous</a>
+            {% endif %}
+            
+            {% for part in paginate.parts %}
+              {% if part.is_link %}
+                <a href="{{ part.url }}" style="
+                  display: inline-block;
+                  width: 40px;
+                  height: 40px;
+                  line-height: 40px;
+                  border: 1px solid #ddd;
+                  text-align: center;
+                ">{{ part.title }}</a>
+              {% else %}
+                <span style="
+                  display: inline-block;
+                  width: 40px;
+                  height: 40px;
+                  line-height: 40px;
+                  border: 1px solid var(--accent-color);
+                  background-color: var(--accent-color);
+                  color: #fff;
+                  text-align: center;
+                ">{{ part.title }}</span>
+              {% endif %}
+            {% endfor %}
+            
+            {% if paginate.next %}
+              <a href="{{ paginate.next.url }}" class="btn" style="padding: 8px 15px;">Next</a>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // Sort by functionality
+  const sortBySelect = document.getElementById('SortBy');
+  
+  if (sortBySelect) {
+    sortBySelect.addEventListener('change', function() {
+      const url = new URL(window.location.href);
+      url.searchParams.set('sort_by', this.value);
+      
+      window.location.href = url.href;
+    });
+  }
+  
+  // Quick add functionality
+  const quickAddButtons = document.querySelectorAll('.quick-add');
+  
+  quickAddButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Get product variant ID
+      const variantId = this.closest('.product-card').dataset.variantId;
+      
+      if (variantId) {
+        // Add to cart functionality - this would use Shopify's AJAX API
+        fetch('/cart/add.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            id: variantId,
+            quantity: 1
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Show a mini cart or success notification
+          alert('Item added to cart!');
+          
+          // Update cart count
+          fetch('/cart.js')
+            .then(response => response.json())
+            .then(cart => {
+              const cartCount = document.querySelector('.cart-count');
+              if (cartCount) {
+                cartCount.textContent = cart.item_count;
+              }
+            });
+        })
+        .catch(error => {
+          console.error('Error adding item to cart:', error);
+        });
+      }
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Collection Pages",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_collection_image",
+      "label": "Show collection image",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Sidebar & Filters"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sidebar",
+      "label": "Show sidebar",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection_list",
+      "label": "Show collection list",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_type_filter",
+      "label": "Show product type filter",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor_filter",
+      "label": "Show vendor filter",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price_filter",
+      "label": "Show price filter",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "label": "Products per page",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Pagination"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show pagination",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

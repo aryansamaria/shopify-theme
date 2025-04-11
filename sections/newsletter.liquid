@@ -1,0 +1,64 @@
+{% if section.settings.show_newsletter %}
+  <section class="newsletter">
+    <div class="container">
+      <h2>{{ section.settings.newsletter_title }}</h2>
+      <p>{{ section.settings.newsletter_text }}</p>
+      
+      {% form 'customer', class: 'newsletter-form' %}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        <input 
+          type="email" 
+          name="contact[email]" 
+          placeholder="{{ section.settings.newsletter_placeholder }}"
+          aria-label="{{ section.settings.newsletter_placeholder }}"
+          required
+        >
+        <button type="submit">{{ section.settings.newsletter_button }}</button>
+      {% endform %}
+    </div>
+  </section>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_newsletter",
+      "label": "Show newsletter",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "newsletter_title",
+      "label": "Newsletter title",
+      "default": "Subscribe to Our Newsletter"
+    },
+    {
+      "type": "textarea",
+      "id": "newsletter_text",
+      "label": "Newsletter text",
+      "default": "Stay updated with our latest collections, exclusive offers, and fashion inspiration."
+    },
+    {
+      "type": "text",
+      "id": "newsletter_placeholder",
+      "label": "Email placeholder",
+      "default": "Your email address"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_button",
+      "label": "Button text",
+      "default": "Subscribe"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Newsletter",
+      "category": "Promotional"
+    }
+  ]
+}
+{% endschema %}

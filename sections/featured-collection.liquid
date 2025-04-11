@@ -1,0 +1,100 @@
+<section class="featured-section">
+  <div class="container">
+    <div class="section-title">
+      <h2>{{ section.settings.title }}</h2>
+      {% if section.settings.subtitle != blank %}
+        <p>{{ section.settings.subtitle }}</p>
+      {% endif %}
+    </div>
+    
+    <div class="product-grid">
+      {% assign collection = collections[section.settings.collection] %}
+      {% assign product_limit = section.settings.product_count %}
+      
+      {% for product in collection.products limit: product_limit %}
+        <div class="product-card">
+          <a href="{{ product.url }}">
+            <div class="product-image-container">
+              {% if product.featured_image != blank %}
+                <img 
+                  class="product-image"
+                  src="{{ product.featured_image | img_url: 'medium' }}" 
+                  alt="{{ product.featured_image.alt | escape }}"
+                  loading="lazy"
+                >
+              {% else %}
+                {{ 'product-1' | placeholder_svg_tag: 'product-image' }}
+              {% endif %}
+              
+              <div class="quick-add">Quick Add</div>
+            </div>
+            
+            <div class="product-info">
+              <h3 class="product-title">{{ product.title }}</h3>
+              <div class="product-price">
+                {% if product.compare_at_price > product.price %}
+                  <span class="sale-price">{{ product.price | money }}</span>
+                  <s class="regular-price">{{ product.compare_at_price | money }}</s>
+                {% else %}
+                  <span>{{ product.price | money }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+    
+    {% if section.settings.view_all %}
+      <div class="text-center" style="margin-top: 40px;">
+        <a href="{{ collection.url }}" class="btn">View All</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured Collection",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Featured Collection"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Shop our most popular items"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "product_count",
+      "min": 4,
+      "max": 12,
+      "step": 1,
+      "label": "Number of products",
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "view_all",
+      "label": "Show 'View All' button",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Collection",
+      "category": "Collection"
+    }
+  ]
+}
+{% endschema %}

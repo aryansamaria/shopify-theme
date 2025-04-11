@@ -1,0 +1,407 @@
+<div class="container" style="padding: 60px 0;">
+  <div class="product-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: start;">
+    <!-- Product Images -->
+    <div class="product-images">
+      {% if product.featured_media %}
+        <img 
+          id="featured-image" 
+          src="{{ product.featured_media | img_url: 'large' }}" 
+          alt="{{ product.featured_media.alt | escape }}"
+          class="featured-image"
+          style="width: 100%; margin-bottom: 20px;"
+        >
+      {% endif %}
+      
+      {% if product.media.size > 1 %}
+        <div class="product-thumbnails" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          {% for media in product.media %}
+            <div 
+              class="thumbnail{% if forloop.first %} active{% endif %}" 
+              data-image="{{ media | img_url: 'large' }}"
+              style="width: calc(25% - 8px); cursor: pointer;"
+            >
+              <img 
+                src="{{ media | img_url: 'compact' }}" 
+                alt="{{ media.alt | escape }}"
+                style="width: 100%; border: 2px solid {% if forloop.first %}#000{% else %}transparent{% endif %};"
+              >
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+    
+    <!-- Product Information -->
+    <div class="product-info">
+      <h1 class="product-title" style="font-size: 2rem; margin-bottom: 10px; font-family: var(--font-secondary);">{{ product.title }}</h1>
+      
+      {% if product.vendor %}
+        <p class="product-vendor" style="margin-bottom: 15px; color: #777;">{{ product.vendor }}</p>
+      {% endif %}
+      
+      <div class="product-price" style="margin-bottom: 20px; font-size: 1.5rem; font-weight: 600;">
+        {% if product.compare_at_price > product.price %}
+          <span class="sale-price" style="color: var(--accent-color);">{{ product.price | money }}</span>
+          <s class="regular-price" style="color: #777; font-size: 1.1rem; margin-left: 10px;">{{ product.compare_at_price | money }}</s>
+        {% else %}
+          <span>{{ product.price | money }}</span>
+        {% endif %}
+      </div>
+      
+      {% form 'product', product, class: 'product-form' %}
+        <!-- Variant Options -->
+        {% unless product.has_only_default_variant %}
+          <div class="product-options" style="margin-bottom: 25px;">
+            {% for option in product.options_with_values %}
+              <div class="product-option" style="margin-bottom: 15px;">
+                <label for="Option{{ option.position }}" style="display: block; margin-bottom: 8px; font-weight: 500;">
+                  {{ option.name }}
+                </label>
+                
+                <select 
+                  id="Option{{ option.position }}" 
+                  name="options[{{ option.name }}]"
+                  class="option-select"
+                  style="width: 100%; padding: 10px; border: 1px solid #ddd;"
+                >
+                  {% for value in option.values %}
+                    <option 
+                      value="{{ value | escape }}"
+                      {% if option.selected_value == value %}selected="selected"{% endif %}
+                    >
+                      {{ value }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endfor %}
+          </div>
+        {% endunless %}
+        
+        <!-- Quantity -->
+        <div class="product-quantity" style="margin-bottom: 25px;">
+          <label for="Quantity" style="display: block; margin-bottom: 8px; font-weight: 500;">Quantity</label>
+          <div class="quantity-selector" style="display: flex; align-items: center; border: 1px solid #ddd;">
+            <button type="button" class="quantity-decrease" style="width: 40px; height: 40px; background: none; border: none; cursor: pointer;">-</button>
+            <input 
+              type="number" 
+              id="Quantity" 
+              name="quantity" 
+              value="1" 
+              min="1" 
+              style="width: 50px; height: 40px; text-align: center; border: none; appearance: none; -moz-appearance: textfield;"
+            >
+            <button type="button" class="quantity-increase" style="width: 40px; height: 40px; background: none; border: none; cursor: pointer;">+</button>
+          </div>
+        </div>
+        
+        <!-- Add to Cart Button -->
+        <div style="margin-bottom: 25px;">
+          <button 
+            type="submit" 
+            name="add" 
+            class="btn" 
+            style="width: 100%; padding: 15px;"
+            {% unless product.available %}disabled{% endunless %}
+          >
+            {% if product.available %}
+              Add to Cart
+            {% else %}
+              Sold Out
+            {% endif %}
+          </button>
+        </div>
+        
+        <!-- Dynamic Checkout Button -->
+        {{ form | payment_button }}
+        
+        <!-- Hidden Input for Variant ID -->
+        <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+      {% endform %}
+      
+      <!-- Product Description -->
+      <div class="product-description" style="margin-top: 30px;">
+        <h3 style="margin-bottom: 15px; font-family: var(--font-secondary);">Description</h3>
+        <div class="rte">
+          {{ product.description }}
+        </div>
+      </div>
+      
+      <!-- Product Details -->
+      {% if product.metafields.custom.specifications or product.metafields.custom.fabric or product.metafields.custom.care %}
+        <div class="product-details" style="margin-top: 30px;">
+          <h3 style="margin-bottom: 15px; font-family: var(--font-secondary);">Details</h3>
+          
+          {% if product.metafields.custom.specifications %}
+            <div style="margin-bottom: 20px;">
+              <strong>Specifications:</strong>
+              <div>{{ product.metafields.custom.specifications }}</div>
+            </div>
+          {% endif %}
+          
+          {% if product.metafields.custom.fabric %}
+            <div style="margin-bottom: 20px;">
+              <strong>Fabric:</strong>
+              <div>{{ product.metafields.custom.fabric }}</div>
+            </div>
+          {% endif %}
+          
+          {% if product.metafields.custom.care %}
+            <div>
+              <strong>Care Instructions:</strong>
+              <div>{{ product.metafields.custom.care }}</div>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+      
+      <!-- Product Tags -->
+      {% if product.tags.size > 0 %}
+        <div class="product-tags" style="margin-top: 30px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            {% for tag in product.tags %}
+              <span style="background-color: #f5f5f5; padding: 5px 10px; font-size: 0.9rem;">{{ tag }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+      
+      <!-- Social Sharing -->
+      <div class="social-sharing" style="margin-top: 30px;">
+        <h3 style="margin-bottom: 15px; font-family: var(--font-secondary);">Share</h3>
+        <div style="display: flex; gap: 15px;">
+          <a href="https://www.facebook.com/sharer.php?u={{ shop.url }}{{ product.url }}" target="_blank" rel="noopener" aria-label="Share on Facebook">
+            <i class="fab fa-facebook-f" style="font-size: 1.2rem;"></i>
+          </a>
+          <a href="https://twitter.com/share?text={{ product.title | url_encode }}&url={{ shop.url }}{{ product.url }}" target="_blank" rel="noopener" aria-label="Share on Twitter">
+            <i class="fab fa-twitter" style="font-size: 1.2rem;"></i>
+          </a>
+          <a href="https://pinterest.com/pin/create/button/?url={{ shop.url }}{{ product.url }}&media={{ product.featured_image | img_url: 'large' }}&description={{ product.description | strip_html | truncatewords: 20 | url_encode }}" target="_blank" rel="noopener" aria-label="Pin on Pinterest">
+            <i class="fab fa-pinterest-p" style="font-size: 1.2rem;"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Related Products -->
+  {% if section.settings.show_related_products %}
+    <div class="related-products" style="margin-top: 80px;">
+      <h2 style="text-align: center; margin-bottom: 40px; font-family: var(--font-secondary);">{{ section.settings.related_products_title }}</h2>
+      
+      <div class="product-grid">
+        {% assign related_limit = section.settings.related_products_limit %}
+        {% assign current_product = product %}
+        {% assign current_tags = current_product.tags %}
+        
+        {% capture related_products %}
+          {% for product in collections.all.products %}
+            {% if product.id != current_product.id %}
+              {% for tag in current_tags %}
+                {% if product.tags contains tag %}
+                  {{ product.id }}|{{ product.url }}|{{ product.title }}|{{ product.featured_image | img_url: 'medium' }}|{{ product.price }}|{{ product.compare_at_price }}###
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+        {% endcapture %}
+        
+        {% assign related_products_array = related_products | split: '###' %}
+        
+        {% for related in related_products_array limit: related_limit %}
+          {% unless related == '' %}
+            {% assign related_product_info = related | split: '|' %}
+            <div class="product-card">
+              <a href="{{ related_product_info[1] }}">
+                <div class="product-image-container">
+                  <img 
+                    class="product-image"
+                    src="{{ related_product_info[3] }}" 
+                    alt="{{ related_product_info[2] }}"
+                    loading="lazy"
+                  >
+                  <div class="quick-add">Quick Add</div>
+                </div>
+                
+                <div class="product-info">
+                  <h3 class="product-title">{{ related_product_info[2] }}</h3>
+                  <div class="product-price">
+                    {% if related_product_info[5] > related_product_info[4] %}
+                      <span class="sale-price">{{ related_product_info[4] | money }}</span>
+                      <s class="regular-price">{{ related_product_info[5] | money }}</s>
+                    {% else %}
+                      <span>{{ related_product_info[4] | money }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </a>
+            </div>
+          {% endunless %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Quantity selector
+    const quantityInput = document.getElementById('Quantity');
+    const decreaseBtn = document.querySelector('.quantity-decrease');
+    const increaseBtn = document.querySelector('.quantity-increase');
+    
+    if (decreaseBtn && increaseBtn && quantityInput) {
+      decreaseBtn.addEventListener('click', function() {
+        const currentValue = parseInt(quantityInput.value);
+        if (currentValue > 1) {
+          quantityInput.value = currentValue - 1;
+        }
+      });
+      
+      increaseBtn.addEventListener('click', function() {
+        const currentValue = parseInt(quantityInput.value);
+        quantityInput.value = currentValue + 1;
+      });
+    }
+    
+    // Thumbnail gallery
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    const featuredImage = document.getElementById('featured-image');
+    
+    if (thumbnails.length > 0 && featuredImage) {
+      thumbnails.forEach(thumbnail => {
+        thumbnail.addEventListener('click', function() {
+          // Update featured image
+          featuredImage.src = this.dataset.image;
+          
+          // Update active thumbnail
+          thumbnails.forEach(thumb => {
+            thumb.querySelector('img').style.border = '2px solid transparent';
+          });
+          this.querySelector('img').style.border = '2px solid #000';
+        });
+      });
+    }
+    
+    // Variant selectors
+    const variantSelectors = document.querySelectorAll('.option-select');
+    const variantIdInput = document.querySelector('input[name="id"]');
+    
+    if (variantSelectors.length > 0 && variantIdInput) {
+      const variants = [
+        {% for variant in product.variants %}
+          {
+            id: {{ variant.id }},
+            {% for option in variant.options %}
+              option{{ forloop.index }}: {{ option | json }},
+            {% endfor %}
+            available: {{ variant.available | json }},
+            price: {{ variant.price | money | json }},
+            comparePrice: {{ variant.compare_at_price | money | json }}
+          }{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      ];
+      
+      function updateVariantSelection() {
+        const selectedOptions = [];
+        
+        variantSelectors.forEach(selector => {
+          selectedOptions.push(selector.value);
+        });
+        
+        // Find matching variant
+        const matchingVariant = variants.find(variant => {
+          return selectedOptions.every((option, index) => {
+            return variant['option' + (index + 1)] === option;
+          });
+        });
+        
+        if (matchingVariant) {
+          // Update variant ID
+          variantIdInput.value = matchingVariant.id;
+          
+          // Update price
+          const priceElement = document.querySelector('.product-price');
+          if (priceElement) {
+            if (matchingVariant.comparePrice && parseFloat(matchingVariant.comparePrice) > parseFloat(matchingVariant.price)) {
+              priceElement.innerHTML = `
+                <span class="sale-price" style="color: var(--accent-color);">${matchingVariant.price}</span>
+                <s class="regular-price" style="color: #777; font-size: 1.1rem; margin-left: 10px;">${matchingVariant.comparePrice}</s>
+              `;
+            } else {
+              priceElement.innerHTML = `<span>${matchingVariant.price}</span>`;
+            }
+          }
+          
+          // Update add to cart button
+          const addToCartButton = document.querySelector('button[name="add"]');
+          if (addToCartButton) {
+            if (matchingVariant.available) {
+              addToCartButton.disabled = false;
+              addToCartButton.textContent = 'Add to Cart';
+            } else {
+              addToCartButton.disabled = true;
+              addToCartButton.textContent = 'Sold Out';
+            }
+          }
+        }
+      }
+      
+      variantSelectors.forEach(selector => {
+        selector.addEventListener('change', updateVariantSelection);
+      });
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Product",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_quantity_selector",
+      "label": "Show quantity selector",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sku",
+      "label": "Show SKU",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Related Products"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_related_products",
+      "label": "Show related products",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "related_products_title",
+      "label": "Related products title",
+      "default": "You may also like"
+    },
+    {
+      "type": "range",
+      "id": "related_products_limit",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "label": "Number of products",
+      "default": 4
+    }
+  ]
+}
+{% endschema %}

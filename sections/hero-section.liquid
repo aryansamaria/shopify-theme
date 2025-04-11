@@ -1,0 +1,79 @@
+<section class="hero" style="background-image: url('{{ section.settings.hero_image | img_url: 'master' }}');">
+  <div class="container">
+    <div class="hero-content">
+      <h1 class="hero-title">{{ section.settings.hero_title }}</h1>
+      <p class="hero-subtitle">{{ section.settings.hero_subtitle }}</p>
+      
+      {% if section.settings.button_text != blank and section.settings.button_link != blank %}
+        <a href="{{ section.settings.button_link }}" class="btn">{{ section.settings.button_text }}</a>
+      {% endif %}
+      
+      {% if section.settings.secondary_button_text != blank and section.settings.secondary_button_link != blank %}
+        <a href="{{ section.settings.secondary_button_link }}" class="btn btn-outline">{{ section.settings.secondary_button_text }}</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero Banner",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero image"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Heading",
+      "default": "Elevate Your Style"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_subtitle",
+      "label": "Subheading",
+      "default": "Discover our new collection of premium fashion designed for the modern individual."
+    },
+    {
+      "type": "header",
+      "content": "Primary Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "header",
+      "content": "Secondary Button"
+    },
+    {
+      "type": "text",
+      "id": "secondary_button_text",
+      "label": "Button text",
+      "default": "Learn More"
+    },
+    {
+      "type": "url",
+      "id": "secondary_button_link",
+      "label": "Button link",
+      "default": "/pages/about"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Banner",
+      "category": "Image"
+    }
+  ]
+}
+{% endschema %}
